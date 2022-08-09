@@ -609,6 +609,7 @@ static int64_t getTlsTpOffset(const Symbol &s) {
     // to allow a signed 16-bit offset to reach 0x1000 of TCB/thread-library
     // data and 0xf000 of the program's TLS segment.
     return s.getVA(0) + (tls->p_vaddr & (tls->p_align - 1)) - 0x7000;
+  case EM_LOONGARCH:
   case EM_RISCV:
     return s.getVA(0) + (tls->p_vaddr & (tls->p_align - 1));
 
@@ -642,6 +643,13 @@ uint64_t InputSectionBase::getRelocTargetVA(const InputFile *file, RelType type,
     return sym.getVA(a) - getARMStaticBase(sym);
   case R_GOT:
   case R_RELAX_TLS_GD_TO_IE_ABS:
+    // XXX Why???
+    if (config->emachine == EM_LOONGARCH && sym.isTls()) {
+      if (sym.hasFlag(NEEDS_TLSLD))
+        return in.got->getTlsIndexVA() + a;
+      if (sym.hasFlag(NEEDS_TLSGD))
+        return in.got->getGlobalDynAddr(sym) + a;
+    }
     return sym.getGotVA() + a;
   case R_GOTONLY_PC:
     return in.got->getVA() + a - p;
@@ -667,6 +675,8 @@ uint64_t InputSectionBase::getRelocTargetVA(const InputFile *file, RelType type,
   case R_GOT_PC:
   case R_RELAX_TLS_GD_TO_IE:
     return sym.getGotVA() + a - p;
+  case R_LOONGARCH_GOT_PAGE_PC:
+    return getLoongArchPageOffset(sym.getGotVA() + a, p);
   case R_MIPS_GOTREL:
     return sym.getVA(a) - in.mipsGot->getGp(file);
   case R_MIPS_GOT_GP:
@@ -715,6 +725,8 @@ uint64_t InputSectionBase::getRelocTargetVA(const InputFile *file, RelType type,
                               *hiRel->sym, hiRel->expr);
     return 0;
   }
+  case R_LOONGARCH_PAGE_PC:
+    return getLoongArchPageOffset(sym.getVA(a), p);
   case R_PC:
   case R_ARM_PCA: {
     uint64_t dest;
@@ -808,12 +820,16 @@ uint64_t InputSectionBase::getRelocTargetVA(const InputFile *file, RelType type,
     return in.got->getGlobalDynAddr(sym) + a - in.gotPlt->getVA();
   case R_TLSGD_PC:
     return in.got->getGlobalDynAddr(sym) + a - p;
+  case R_LOONGARCH_TLSGD_PAGE_PC:
+    return getLoongArchPageOffset(in.got->getGlobalDynAddr(sym) + a, p);
   case R_TLSLD_GOTPLT:
     return in.got->getVA() + in.got->getTlsIndexOff() + a - in.gotPlt->getVA();
   case R_TLSLD_GOT:
     return in.got->getTlsIndexOff() + a;
   case R_TLSLD_PC:
     return in.got->getTlsIndexVA() + a - p;
+  case R_LOONGARCH_TLSLD_PAGE_PC:
+    return getLoongArchPageOffset(in.got->getTlsIndexVA() + a, p);
   default:
     llvm_unreachable("invalid expression");
   }
