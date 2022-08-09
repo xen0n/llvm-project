@@ -1,0 +1,59 @@
+# REQUIRES: loongarch
+# RUN: rm -rf %t && split-file %s %t
+
+# RUN: yaml2obj %t/v0-lp64d.yaml -o %t/v0-lp64d.o
+# RUN: yaml2obj %t/v1-lp64d.yaml -o %t/v1-lp64d.o
+# RUN: yaml2obj %t/v1-lp64s.yaml -o %t/v1-lp64s.o
+
+## Check that binary input results in e_flags=0 output.
+# RUN: ld.lld -m elf64loongarch -b binary %t/blob.o -o %t/blob.out
+# RUN: llvm-readobj -h %t/blob.out | FileCheck --check-prefix=EMPTY %s
+# EMPTY:      Flags [
+# EMPTY-NEXT: ]
+
+## Check that interlink between different ABIs is disallowed.
+# RUN: not ld.lld %t/v1-lp64s.o %t/v1-lp64d.o -o /dev/null 2>&1 | FileCheck --check-prefix=INTERLINK-ERR %s
+# INTERLINK-ERR: cannot link object files with different ABI
+
+## Check that interlink between different object ABI versions is disallowed.
+# RUN: not ld.lld %t/v0-lp64d.o %t/v1-lp64d.o -o /dev/null 2>&1 | FileCheck --check-prefix=VERSION-ERR %s
+# VERSION-ERR: unsupported object file ABI version
+
+#--- blob.o
+BLOB
+
+#--- v0-lp64d.yaml
+--- !ELF
+FileHeader:
+  Class:           ELFCLASS64
+  Data:            ELFDATA2LSB
+  Type:            ET_REL
+  Machine:         EM_LOONGARCH
+  Flags: [
+    EF_LOONGARCH_ABI_DOUBLE_FLOAT,
+    EF_LOONGARCH_OBJABI_V0,
+  ]
+
+#--- v1-lp64d.yaml
+--- !ELF
+FileHeader:
+  Class:           ELFCLASS64
+  Data:            ELFDATA2LSB
+  Type:            ET_REL
+  Machine:         EM_LOONGARCH
+  Flags: [
+    EF_LOONGARCH_ABI_DOUBLE_FLOAT,
+    EF_LOONGARCH_OBJABI_V1,
+  ]
+
+#--- v1-lp64s.yaml
+--- !ELF
+FileHeader:
+  Class:           ELFCLASS64
+  Data:            ELFDATA2LSB
+  Type:            ET_REL
+  Machine:         EM_LOONGARCH
+  Flags: [
+    EF_LOONGARCH_ABI_SOFT_FLOAT,
+    EF_LOONGARCH_OBJABI_V1,
+  ]
