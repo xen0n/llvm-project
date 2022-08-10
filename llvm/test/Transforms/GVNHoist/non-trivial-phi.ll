@@ -1,5 +1,6 @@
 ; RUN: opt -gvn-hoist %s -S -o - | FileCheck %s
 
+; CHECK: define void @f
 ; CHECK: store
 ; CHECK-NOT: store
 
