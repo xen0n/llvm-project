@@ -511,6 +511,60 @@ static uint64_t resolveCSKY(uint64_t Type, uint64_t Offset, uint64_t S,
   }
 }
 
+static bool supportsLoongArch(uint64_t Type) {
+  switch (Type) {
+  case ELF::R_LARCH_NONE:
+  case ELF::R_LARCH_32:
+  case ELF::R_LARCH_32_PCREL:
+  case ELF::R_LARCH_64:
+  case ELF::R_LARCH_ADD8:
+  case ELF::R_LARCH_SUB8:
+  case ELF::R_LARCH_ADD16:
+  case ELF::R_LARCH_SUB16:
+  case ELF::R_LARCH_ADD32:
+  case ELF::R_LARCH_SUB32:
+  case ELF::R_LARCH_ADD64:
+  case ELF::R_LARCH_SUB64:
+    return true;
+  default:
+    return false;
+  }
+}
+
+static uint64_t resolveLoongArch(uint64_t Type, uint64_t Offset, uint64_t S,
+                                 uint64_t LocData, int64_t Addend) {
+  int64_t RA = Addend;
+  uint64_t A = LocData;
+  switch (Type) {
+  case ELF::R_LARCH_NONE:
+    return LocData;
+  case ELF::R_LARCH_32:
+    return (S + RA) & 0xFFFFFFFF;
+  case ELF::R_LARCH_32_PCREL:
+    return (S + RA - Offset) & 0xFFFFFFFF;
+  case ELF::R_LARCH_64:
+    return S + RA;
+  case ELF::R_LARCH_ADD8:
+    return (A + (S + RA)) & 0xFF;
+  case ELF::R_LARCH_SUB8:
+    return (A - (S + RA)) & 0xFF;
+  case ELF::R_LARCH_ADD16:
+    return (A + (S + RA)) & 0xFFFF;
+  case ELF::R_LARCH_SUB16:
+    return (A - (S + RA)) & 0xFFFF;
+  case ELF::R_LARCH_ADD32:
+    return (A + (S + RA)) & 0xFFFFFFFF;
+  case ELF::R_LARCH_SUB32:
+    return (A - (S + RA)) & 0xFFFFFFFF;
+  case ELF::R_LARCH_ADD64:
+    return (A + (S + RA));
+  case ELF::R_LARCH_SUB64:
+    return (A - (S + RA));
+  default:
+    llvm_unreachable("Invalid relocation type");
+  }
+}
+
 static bool supportsCOFFX86(uint64_t Type) {
   switch (Type) {
   case COFF::IMAGE_REL_I386_SECREL:
@@ -711,6 +765,8 @@ getRelocationResolver(const ObjectFile &Obj) {
       case Triple::bpfel:
       case Triple::bpfeb:
         return {supportsBPF, resolveBPF};
+      case Triple::loongarch64:
+        return {supportsLoongArch, resolveLoongArch};
       case Triple::mips64el:
       case Triple::mips64:
         return {supportsMips64, resolveMips64};
@@ -747,6 +803,8 @@ getRelocationResolver(const ObjectFile &Obj) {
       return {supportsAVR, resolveAVR};
     case Triple::lanai:
       return {supportsLanai, resolveLanai};
+    case Triple::loongarch32:
+      return {supportsLoongArch, resolveLoongArch};
     case Triple::mipsel:
     case Triple::mips:
       return {supportsMips32, resolveMips32};
