@@ -73,22 +73,6 @@ unsigned LoongArchELFObjectWriter::getRelocType(MCContext &Ctx,
     return ELF::R_LARCH_PCALA_LO12;
   case LoongArch::fixup_loongarch_b26:
     return ELF::R_LARCH_B26;
-  case LoongArch::fixup_loongarch_add_8:
-    return ELF::R_LARCH_ADD8;
-  case LoongArch::fixup_loongarch_sub_8:
-    return ELF::R_LARCH_SUB8;
-  case LoongArch::fixup_loongarch_add_16:
-    return ELF::R_LARCH_ADD16;
-  case LoongArch::fixup_loongarch_sub_16:
-    return ELF::R_LARCH_SUB16;
-  case LoongArch::fixup_loongarch_add_32:
-    return ELF::R_LARCH_ADD32;
-  case LoongArch::fixup_loongarch_sub_32:
-    return ELF::R_LARCH_SUB32;
-  case LoongArch::fixup_loongarch_add_64:
-    return ELF::R_LARCH_ADD64;
-  case LoongArch::fixup_loongarch_sub_64:
-    return ELF::R_LARCH_SUB64;
     // TODO: Handle more fixup-kinds.
   }
 }
