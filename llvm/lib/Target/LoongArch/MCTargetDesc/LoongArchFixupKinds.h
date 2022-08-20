@@ -27,6 +27,30 @@ enum Fixups {
   fixup_loongarch_pcala_hi20,
   // 12-bit fixup corresponding to %pc_lo12(foo) for instructions addi.w/d.
   fixup_loongarch_pcala_lo12,
+  // 8-bit fixup corresponding to R_LARCH_ADD8 for 8-bit symbolic difference
+  // paired relocations.
+  fixup_loongarch_add_8,
+  // 8-bit fixup corresponding to R_LARCH_SUB8 for 8-bit symbolic difference
+  // paired relocations.
+  fixup_loongarch_sub_8,
+  // 16-bit fixup corresponding to R_LARCH_ADD16 for 16-bit symbolic difference
+  // paired reloctions.
+  fixup_loongarch_add_16,
+  // 16-bit fixup corresponding to R_LARCH_SUB16 for 16-bit symbolic difference
+  // paired reloctions.
+  fixup_loongarch_sub_16,
+  // 32-bit fixup corresponding to R_LARCH_ADD32 for 32-bit symbolic difference
+  // paired relocations.
+  fixup_loongarch_add_32,
+  // 32-bit fixup corresponding to R_LARCH_SUB32 for 32-bit symbolic difference
+  // paired relocations.
+  fixup_loongarch_sub_32,
+  // 64-bit fixup corresponding to R_LARCH_ADD64 for 64-bit symbolic difference
+  // paired relocations.
+  fixup_loongarch_add_64,
+  // 64-bit fixup corresponding to R_LARCH_SUB64 for 64-bit symbolic difference
+  // paired relocations.
+  fixup_loongarch_sub_64,
   // TODO: Add more fixup kind.
 
   // Used as a sentinel, must be the last.
