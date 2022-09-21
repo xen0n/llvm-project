@@ -741,6 +741,17 @@ def : Pat<(not (or GPR:$rj, GPR:$rk)), (NOR GPR:$rj, GPR:$rk)>;
 def : Pat<(or GPR:$rj, (not GPR:$rk)), (ORN GPR:$rj, GPR:$rk)>;
 def : Pat<(and GPR:$rj, (not GPR:$rk)), (ANDN GPR:$rj, GPR:$rk)>;
 
+/// Traps
+
+// We lower `trap` to `break 0` as this is guaranteed to exist and work, even
+// for LA32 Primary.
+def : Pat<(trap), (BREAK 0)>;
+
+// We lower `debugtrap` also to `break 0` because so far the ISA does not
+// provide a specific trap instruction/kind for specifically alerting the
+// debugger.
+def : Pat<(debugtrap), (BREAK 0)>;
+
 /// Bit counting operations
 
 let Predicates = [IsLA64] in {
