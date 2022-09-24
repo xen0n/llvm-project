@@ -2,6 +2,17 @@
 ; RUN: llc --mtriple=loongarch64 < %s | FileCheck %s
 
 %struct.key_t = type { i32, [16 x i8] }
+%size2016 = type [2016 x i8]
+%size2032 = type [2032 x i8]
+%size2048 = type [2048 x i8]
+%size1234567 = type [1234567 x i8]
+
+declare void @llvm.memset.p0i8.i64(ptr, i8, i64, i1)
+declare void @test1(ptr)
+declare void @test2016(ptr byval(%size2016))
+declare void @test2032(ptr byval(%size2032))
+declare void @test2048(ptr byval(%size2048))
+declare void @test1234567(ptr byval(%size1234567))
 
 define i32 @test() nounwind {
 ; CHECK-LABEL: test:
@@ -24,6 +35,134 @@ define i32 @test() nounwind {
   ret i32 0
 }
 
-declare void @llvm.memset.p0i8.i64(ptr, i8, i64, i1)
+;; Should involve only one SP-adjusting addi per adjustment.
+;; TODO: The codegen quality of this and the other cases below should be
+;; improved later; FP should be unnecessary in this case (cross-check RISCV
+;; codegen to see how FP is not involved there).
+define void @test_large_frame_size_2032(ptr byval(%size2016) %x) {
+; CHECK-LABEL: test_large_frame_size_2032:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    addi.d $sp, $sp, -2032
+; CHECK-NEXT:    .cfi_def_cfa_offset 2032
+; CHECK-NEXT:    st.d $ra, $sp, 2024 # 8-byte Folded Spill
+; CHECK-NEXT:    st.d $fp, $sp, 2016 # 8-byte Folded Spill
+; CHECK-NEXT:    .cfi_offset 1, -8
+; CHECK-NEXT:    .cfi_offset 22, -16
+; CHECK-NEXT:    move $a1, $a0
+; CHECK-NEXT:    addi.d $fp, $sp, 0
+; CHECK-NEXT:    ori $a2, $zero, 2016
+; CHECK-NEXT:    move $a0, $fp
+; CHECK-NEXT:    bl %plt(memcpy)
+; CHECK-NEXT:    move $a0, $fp
+; CHECK-NEXT:    bl %plt(test2032)
+; CHECK-NEXT:    ld.d $fp, $sp, 2016 # 8-byte Folded Reload
+; CHECK-NEXT:    ld.d $ra, $sp, 2024 # 8-byte Folded Reload
+; CHECK-NEXT:    addi.d $sp, $sp, 2032
+; CHECK-NEXT:    ret
+  call void @test2032(ptr byval(%size2016) %x)
+  ret void
+}
 
-declare void @test1(ptr)
+;; Should involve two SP-adjusting addi's when adjusting SP up, but only one
+;; when adjusting down.
+define void @test_large_frame_size_2048(ptr byval(%size2032) %x) {
+; CHECK-LABEL: test_large_frame_size_2048:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    addi.d $sp, $sp, -2048
+; CHECK-NEXT:    .cfi_def_cfa_offset 2048
+; CHECK-NEXT:    st.d $ra, $sp, 2040 # 8-byte Folded Spill
+; CHECK-NEXT:    st.d $fp, $sp, 2032 # 8-byte Folded Spill
+; CHECK-NEXT:    .cfi_offset 1, -8
+; CHECK-NEXT:    .cfi_offset 22, -16
+; CHECK-NEXT:    move $a1, $a0
+; CHECK-NEXT:    addi.d $fp, $sp, 0
+; CHECK-NEXT:    ori $a2, $zero, 2032
+; CHECK-NEXT:    move $a0, $fp
+; CHECK-NEXT:    bl %plt(memcpy)
+; CHECK-NEXT:    move $a0, $fp
+; CHECK-NEXT:    bl %plt(test2032)
+; CHECK-NEXT:    ld.d $fp, $sp, 2032 # 8-byte Folded Reload
+; CHECK-NEXT:    ld.d $ra, $sp, 2040 # 8-byte Folded Reload
+; CHECK-NEXT:    addi.d $sp, $sp, 2032
+; CHECK-NEXT:    addi.d $sp, $sp, 16
+; CHECK-NEXT:    ret
+  call void @test2032(ptr byval(%size2032) %x)
+  ret void
+}
+
+;; Should involve two SP-adjusting addi's per adjustment.
+define void @test_large_frame_size_2064(ptr byval(%size2048) %x) {
+; CHECK-LABEL: test_large_frame_size_2064:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    addi.d $sp, $sp, -2048
+; CHECK-NEXT:    addi.d $sp, $sp, -16
+; CHECK-NEXT:    .cfi_def_cfa_offset 2064
+; CHECK-NEXT:    ori $a1, $zero, 2056
+; CHECK-NEXT:    add.d $a1, $sp, $a1
+; CHECK-NEXT:    st.d $ra, $a1, 0 # 8-byte Folded Spill
+; CHECK-NEXT:    ori $a1, $zero, 2048
+; CHECK-NEXT:    add.d $a1, $sp, $a1
+; CHECK-NEXT:    st.d $fp, $a1, 0 # 8-byte Folded Spill
+; CHECK-NEXT:    .cfi_offset 1, -8
+; CHECK-NEXT:    .cfi_offset 22, -16
+; CHECK-NEXT:    move $a1, $a0
+; CHECK-NEXT:    addi.d $fp, $sp, 0
+; CHECK-NEXT:    ori $a2, $zero, 2048
+; CHECK-NEXT:    move $a0, $fp
+; CHECK-NEXT:    bl %plt(memcpy)
+; CHECK-NEXT:    move $a0, $fp
+; CHECK-NEXT:    bl %plt(test2048)
+; CHECK-NEXT:    ori $a0, $zero, 2048
+; CHECK-NEXT:    add.d $a0, $sp, $a0
+; CHECK-NEXT:    ld.d $fp, $a0, 0 # 8-byte Folded Reload
+; CHECK-NEXT:    ori $a0, $zero, 2056
+; CHECK-NEXT:    add.d $a0, $sp, $a0
+; CHECK-NEXT:    ld.d $ra, $a0, 0 # 8-byte Folded Reload
+; CHECK-NEXT:    addi.d $sp, $sp, 2032
+; CHECK-NEXT:    addi.d $sp, $sp, 32
+; CHECK-NEXT:    ret
+  call void @test2048(ptr byval(%size2048) %x)
+  ret void
+}
+
+;; SP should be adjusted with help of a scratch register.
+define void @test_large_frame_size_1234592(ptr byval(%size1234567) %x) {
+; CHECK-LABEL: test_large_frame_size_1234592:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    lu12i.w $a1, 301
+; CHECK-NEXT:    ori $a1, $a1, 1696
+; CHECK-NEXT:    sub.d $sp, $sp, $a1
+; CHECK-NEXT:    .cfi_def_cfa_offset 1234592
+; CHECK-NEXT:    lu12i.w $a1, 301
+; CHECK-NEXT:    ori $a1, $a1, 1688
+; CHECK-NEXT:    add.d $a1, $sp, $a1
+; CHECK-NEXT:    st.d $ra, $a1, 0 # 8-byte Folded Spill
+; CHECK-NEXT:    lu12i.w $a1, 301
+; CHECK-NEXT:    ori $a1, $a1, 1680
+; CHECK-NEXT:    add.d $a1, $sp, $a1
+; CHECK-NEXT:    st.d $fp, $a1, 0 # 8-byte Folded Spill
+; CHECK-NEXT:    .cfi_offset 1, -8
+; CHECK-NEXT:    .cfi_offset 22, -16
+; CHECK-NEXT:    move $a1, $a0
+; CHECK-NEXT:    lu12i.w $a0, 301
+; CHECK-NEXT:    ori $a2, $a0, 1671
+; CHECK-NEXT:    addi.d $fp, $sp, 9
+; CHECK-NEXT:    move $a0, $fp
+; CHECK-NEXT:    bl %plt(memcpy)
+; CHECK-NEXT:    move $a0, $fp
+; CHECK-NEXT:    bl %plt(test1234567)
+; CHECK-NEXT:    lu12i.w $a0, 301
+; CHECK-NEXT:    ori $a0, $a0, 1680
+; CHECK-NEXT:    add.d $a0, $sp, $a0
+; CHECK-NEXT:    ld.d $fp, $a0, 0 # 8-byte Folded Reload
+; CHECK-NEXT:    lu12i.w $a0, 301
+; CHECK-NEXT:    ori $a0, $a0, 1688
+; CHECK-NEXT:    add.d $a0, $sp, $a0
+; CHECK-NEXT:    ld.d $ra, $a0, 0 # 8-byte Folded Reload
+; CHECK-NEXT:    lu12i.w $a0, 301
+; CHECK-NEXT:    ori $a0, $a0, 1696
+; CHECK-NEXT:    add.d $sp, $sp, $a0
+; CHECK-NEXT:    ret
+  call void @test1234567(ptr byval(%size1234567) %x)
+  ret void
+}
