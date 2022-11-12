@@ -11,9 +11,11 @@
 #include "Symbols.h"
 #include "SyntheticSections.h"
 #include "Target.h"
+#include "lld/Common/ErrorHandler.h"
 #include "llvm/BinaryFormat/ELF.h"
 #include "llvm/Support/Debug.h"
 #include "llvm/Support/TimeProfiler.h"
+#include <mutex>
 
 using namespace llvm;
 using namespace llvm::object;
@@ -40,6 +42,9 @@ public:
                      const uint8_t *loc) const override;
   void relocate(uint8_t *loc, const Relocation &rel,
                 uint64_t val) const override;
+
+private:
+  std::mutex mu;
 };
 
 } // end anonymous namespace
@@ -305,7 +310,7 @@ RelExpr LoongArch::getRelExpr(const RelType type, const Symbol &s,
   case R_LARCH_PCALA64_LO20:
   case R_LARCH_PCALA_HI20:
   case R_LARCH_PCALA_LO12:
-    return R_PLT_PC; // TODO
+    return R_PC;
 /*
   case R_LARCH_ADD24:
   case R_LARCH_GNU_VTENTRY:
@@ -376,9 +381,7 @@ RelExpr LoongArch::getRelExpr(const RelType type, const Symbol &s,
 
 void LoongArch::relocate(uint8_t *loc, const Relocation &rel,
                          uint64_t val) const {
-#define DEBUG_TYPE "LoongArch"
-  DebugFlag = true;
-  LLVM_DEBUG(dbgs() << "XXX relocate " << loc << " " << Twine(rel.type) << " " << val << "\n");
+  lld::message("XXX relocate " + Twine(rel.type) + " 0x" + Twine::utohexstr(rel.offset) + " 0x" + Twine::utohexstr(val));
   switch (rel.type) {
   case R_LARCH_32:
     write32le(loc, val);
@@ -464,7 +467,6 @@ void LoongArch::relocate(uint8_t *loc, const Relocation &rel,
   case R_LARCH_TLS_LE64_HI12:
   case R_LARCH_TLS_IE64_PC_HI12:
   case R_LARCH_TLS_IE64_HI12: {
-    LLVM_DEBUG(dbgs() << "ABS64 " << extractBits(val, 63, 52) << "\n");
     // TODO: checkInt(loc, SignExtend64(hi, bits) >> 12, 20, rel);
     write32le(loc, setK12(read32le(loc), extractBits(val, 63, 52)));
     return;

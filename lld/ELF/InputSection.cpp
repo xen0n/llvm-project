@@ -16,9 +16,12 @@
 #include "SyntheticSections.h"
 #include "Target.h"
 #include "lld/Common/CommonLinkerContext.h"
+#include "lld/Common/ErrorHandler.h"
+#include "llvm/BinaryFormat/ELF.h"
 #include "llvm/Support/Compiler.h"
 #include "llvm/Support/Compression.h"
 #include "llvm/Support/Endian.h"
+#include "llvm/Support/MathExtras.h"
 #include "llvm/Support/xxhash.h"
 #include <algorithm>
 #include <mutex>
@@ -577,6 +580,13 @@ static Relocation *getRISCVPCRelHi20(const Symbol *sym, uint64_t addend) {
   return nullptr;
 }
 
+static uint64_t getLoongArchPCRegionalDest(uint64_t dest, uint64_t p) {
+  lld::message(">>>>> PCALA dest=" + Twine::utohexstr(dest) + " P=" + Twine::utohexstr(p));
+  int64_t resultLo = SignExtend64<12>(dest & 0xfff);
+  int64_t resultHi = ((dest - p) >> 12) + (resultLo < 0 ? 1 : 0);
+  return (resultHi << 12) | resultLo;
+}
+
 // A TLS symbol's virtual address is relative to the TLS segment. Add a
 // target-specific adjustment to produce a thread-pointer-relative offset.
 static int64_t getTlsTpOffset(const Symbol &s) {
@@ -742,13 +752,13 @@ uint64_t InputSectionBase::getRelocTargetVA(const InputFile *file, RelType type,
     } else {
       dest = sym.getVA(a);
     }
-    return dest - p;
+    return config->emachine == EM_LOONGARCH ? getLoongArchPCRegionalDest(dest, p): dest - p;
   }
   case R_PLT:
     return sym.getPltVA() + a;
   case R_PLT_PC:
   case R_PPC64_CALL_PLT:
-    return sym.getPltVA() + a - p;
+    return config->emachine == EM_LOONGARCH ? getLoongArchPCRegionalDest(sym.getPltVA() + a, p) : sym.getPltVA() + a - p;
   case R_PLT_GOTPLT:
     return sym.getPltVA() + a - in.gotPlt->getVA();
   case R_PPC32_PLTREL:
