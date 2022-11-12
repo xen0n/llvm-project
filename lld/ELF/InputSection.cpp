@@ -609,6 +609,7 @@ static int64_t getTlsTpOffset(const Symbol &s) {
     // to allow a signed 16-bit offset to reach 0x1000 of TCB/thread-library
     // data and 0xf000 of the program's TLS segment.
     return s.getVA(0) + (tls->p_vaddr & (tls->p_align - 1)) - 0x7000;
+  case EM_LOONGARCH:
   case EM_RISCV:
     return s.getVA(0) + (tls->p_vaddr & (tls->p_align - 1));
 

@@ -1239,6 +1239,7 @@ static unsigned handleTlsRelocation(RelType type, Symbol &sym,
   // relaxation as well.
   bool toExecRelax = !config->shared && config->emachine != EM_ARM &&
                      config->emachine != EM_HEXAGON &&
+                     config->emachine != EM_LOONGARCH &&
                      config->emachine != EM_RISCV &&
                      !c.file->ppc64DisableTLSRelax;
 

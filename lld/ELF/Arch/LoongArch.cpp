@@ -106,6 +106,9 @@ static uint32_t setK16(uint32_t insn, uint32_t imm) {
 }
 
 LoongArch::LoongArch() {
+  defaultMaxPageSize = 65536;
+  write32(trapInstr.data(), 0x002a0000); // break 0
+
   copyRel = R_LARCH_COPY;
   pltRel = R_LARCH_JUMP_SLOT;
   relativeRel = R_LARCH_RELATIVE;
