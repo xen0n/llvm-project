@@ -828,14 +828,18 @@ uint64_t InputSectionBase::getRelocTargetVA(const InputFile *file, RelType type,
     return in.got->getGlobalDynOffset(sym) + a;
   case R_TLSGD_GOTPLT:
     return in.got->getGlobalDynAddr(sym) + a - in.gotPlt->getVA();
-  case R_TLSGD_PC:
-    return in.got->getGlobalDynAddr(sym) + a - p;
+  case R_TLSGD_PC: {
+    uint64_t dest = in.got->getGlobalDynAddr(sym) + a;
+    return config->emachine == EM_LOONGARCH ? getLoongArchPCRegionalDest(dest, p) : dest - p;
+  }
   case R_TLSLD_GOTPLT:
     return in.got->getVA() + in.got->getTlsIndexOff() + a - in.gotPlt->getVA();
   case R_TLSLD_GOT:
     return in.got->getTlsIndexOff() + a;
-  case R_TLSLD_PC:
-    return in.got->getTlsIndexVA() + a - p;
+  case R_TLSLD_PC: {
+    uint64_t dest = in.got->getTlsIndexVA() + a;
+    return config->emachine == EM_LOONGARCH ? getLoongArchPCRegionalDest(dest, p) : dest - p;
+  }
   default:
     llvm_unreachable("invalid expression");
   }
