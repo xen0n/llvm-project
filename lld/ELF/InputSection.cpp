@@ -583,13 +583,15 @@ static Relocation *getRISCVPCRelHi20(const Symbol *sym, uint64_t addend) {
 static uint64_t getLoongArchPCRegionalDest(uint64_t dest, uint64_t p) {
   lld::message(">>>>> PCALA dest=" + Twine::utohexstr(dest) + " P=" + Twine::utohexstr(p));
   uint64_t resultLo = dest & 0xfff;
+  lld::message(">>>>>  result lo=" + Twine::utohexstr(resultLo));
   if (resultLo > 0x7ff)
     dest -= 0x100000000 - 0x1000;
   lld::message(">>>>>   now dest=" + Twine::utohexstr(dest));
+  if (dest < p)
+    dest += 0x1000; // XXX
   dest -= p;
   lld::message(">>>>>   now dest=" + Twine::utohexstr(dest));
   lld::message(">>>>>  result hi=" + Twine::utohexstr(dest & ~(uint64_t)0xfff));
-  lld::message(">>>>>  result lo=" + Twine::utohexstr(resultLo));
   lld::message(">>>>>     result=" + Twine::utohexstr((dest & ~(uint64_t)0xfff) | resultLo));
   return (dest & ~(uint64_t)0xfff) | resultLo;
 }
