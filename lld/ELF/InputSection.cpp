@@ -584,7 +584,7 @@ static uint64_t getLoongArchPCRegionalDest(uint64_t dest, uint64_t p) {
   lld::message(">>>>> PCALA dest=" + Twine::utohexstr(dest) + " P=" + Twine::utohexstr(p));
   uint64_t resultLo = dest & 0xfff;
   if (resultLo > 0x7ff)
-    dest -= 0x100000000;
+    dest -= 0x100000000 - 0x1000;
   lld::message(">>>>>   now dest=" + Twine::utohexstr(dest));
   dest -= p;
   lld::message(">>>>>   now dest=" + Twine::utohexstr(dest));
