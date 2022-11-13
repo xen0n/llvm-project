@@ -311,6 +311,15 @@ RelExpr LoongArch::getRelExpr(const RelType type, const Symbol &s,
   case R_LARCH_PCALA_HI20:
   case R_LARCH_PCALA_LO12:
     return R_LOONGARCH_PC_REGIONAL;
+  case R_LARCH_GOT64_HI12:
+  case R_LARCH_GOT64_LO20:
+  case R_LARCH_GOT_HI20:
+  case R_LARCH_GOT_LO12:
+    return R_GOT;
+  case R_LARCH_TLS_LD_HI20:
+    return R_TLSLD_GOT;
+  case R_LARCH_TLS_LD_PC_HI20:
+    return R_TLSLD_PC;
 /*
   case R_LARCH_ADD24:
   case R_LARCH_GNU_VTENTRY:
@@ -319,23 +328,15 @@ RelExpr LoongArch::getRelExpr(const RelType type, const Symbol &s,
   case R_LARCH_SUB24:
 
   case R_LARCH_COPY:
-  case R_LARCH_TLS_DTPMOD32:
-  case R_LARCH_TLS_DTPMOD64:
   case R_LARCH_IRELATIVE:
   case R_LARCH_JUMP_SLOT:
   case R_LARCH_RELATIVE:
 
-  case R_LARCH_GOT64_HI12:
-  case R_LARCH_GOT64_LO20:
-  case R_LARCH_GOT_HI20:
-  case R_LARCH_GOT_LO12:
   case R_LARCH_TLS_GD_HI20:
   case R_LARCH_TLS_IE64_HI12:
   case R_LARCH_TLS_IE64_LO20:
   case R_LARCH_TLS_IE_HI20:
   case R_LARCH_TLS_IE_LO12:
-  case R_LARCH_TLS_LD_HI20:
-  case R_LARCH_TLS_LD_PC_HI20:
   case R_LARCH_TLS_LE64_HI12:
   case R_LARCH_TLS_LE64_LO20:
   case R_LARCH_TLS_LE_HI20:
