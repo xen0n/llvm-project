@@ -582,9 +582,13 @@ static Relocation *getRISCVPCRelHi20(const Symbol *sym, uint64_t addend) {
 
 static uint64_t getLoongArchPCRegionalDest(uint64_t dest, uint64_t p) {
   lld::message(">>>>> PCALA dest=" + Twine::utohexstr(dest) + " P=" + Twine::utohexstr(p));
-  int64_t resultLo = SignExtend64<12>(dest & 0xfff);
-  int64_t resultHi = ((dest - p) >> 12) + (resultLo < 0 ? 1 : 0);
-  return (resultHi << 12) | resultLo;
+  uint64_t resultLo = dest & 0xfff;
+  if (resultLo > 0x7ff)
+    dest -= 0x100000000;
+  lld::message(">>>>>   now dest=" + Twine::utohexstr(dest));
+  dest -= p;
+  lld::message(">>>>>   now dest=" + Twine::utohexstr(dest));
+  return (dest & ~(uint64_t)0xfff) | resultLo;
 }
 
 // A TLS symbol's virtual address is relative to the TLS segment. Add a
@@ -677,7 +681,7 @@ uint64_t InputSectionBase::getRelocTargetVA(const InputFile *file, RelType type,
     return sym.getGotVA() + a - getAArch64Page(in.got->getVA());
   case R_GOT_PC:
   case R_RELAX_TLS_GD_TO_IE:
-    return sym.getGotVA() + a - p;
+    return config->emachine == EM_LOONGARCH ? getLoongArchPCRegionalDest(sym.getGotVA() + a, p) : sym.getGotVA() + a - p;
   case R_MIPS_GOTREL:
     return sym.getVA(a) - in.mipsGot->getGp(file);
   case R_MIPS_GOT_GP:
@@ -758,7 +762,7 @@ uint64_t InputSectionBase::getRelocTargetVA(const InputFile *file, RelType type,
     return sym.getPltVA() + a;
   case R_PLT_PC:
   case R_PPC64_CALL_PLT:
-    return config->emachine == EM_LOONGARCH ? getLoongArchPCRegionalDest(sym.getPltVA() + a, p) : sym.getPltVA() + a - p;
+    return sym.getPltVA() + a - p;
   case R_PLT_GOTPLT:
     return sym.getPltVA() + a - in.gotPlt->getVA();
   case R_PPC32_PLTREL:
