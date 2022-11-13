@@ -587,13 +587,13 @@ static uint64_t getLoongArchPCRegionalDest(uint64_t dest, uint64_t p) {
   if (resultLo > 0x7ff)
     dest -= 0x100000000 - 0x1000;
   lld::message(">>>>>   now dest=" + Twine::utohexstr(dest));
-  if (dest < p)
-    dest += 0x1000; // XXX
-  dest -= p;
+  // if (dest < p)
+  //   dest += 0x1000; // XXX
+  dest -= p & ~0xfff;
   lld::message(">>>>>   now dest=" + Twine::utohexstr(dest));
   lld::message(">>>>>  result hi=" + Twine::utohexstr(dest & ~(uint64_t)0xfff));
   lld::message(">>>>>     result=" + Twine::utohexstr((dest & ~(uint64_t)0xfff) | resultLo));
-  return (dest & ~(uint64_t)0xfff) | resultLo;
+  return (dest & ~0xfff) | resultLo;
 }
 
 // A TLS symbol's virtual address is relative to the TLS segment. Add a
