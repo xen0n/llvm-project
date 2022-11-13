@@ -277,6 +277,10 @@ RelExpr LoongArch::getRelExpr(const RelType type, const Symbol &s,
     return R_DTPREL;
   case R_LARCH_TLS_TPREL32:
   case R_LARCH_TLS_TPREL64:
+  case R_LARCH_TLS_LE64_HI12:
+  case R_LARCH_TLS_LE64_LO20:
+  case R_LARCH_TLS_LE_HI20:
+  case R_LARCH_TLS_LE_LO12:
     return R_TPREL;
   case R_LARCH_ADD8:
   case R_LARCH_ADD16:
@@ -337,10 +341,6 @@ RelExpr LoongArch::getRelExpr(const RelType type, const Symbol &s,
   case R_LARCH_TLS_IE64_LO20:
   case R_LARCH_TLS_IE_HI20:
   case R_LARCH_TLS_IE_LO12:
-  case R_LARCH_TLS_LE64_HI12:
-  case R_LARCH_TLS_LE64_LO20:
-  case R_LARCH_TLS_LE_HI20:
-  case R_LARCH_TLS_LE_LO12:
  */
 
   case R_LARCH_SOP_PUSH_PCREL:
