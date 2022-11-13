@@ -328,19 +328,13 @@ RelExpr LoongArch::getRelExpr(const RelType type, const Symbol &s,
     return R_TLSLD_GOT;
   case R_LARCH_TLS_LD_PC_HI20:
     return R_TLSLD_PC;
+  case R_LARCH_TLS_GD_HI20:
+    return R_TLSGD_GOT;
 /*
-  case R_LARCH_ADD24:
-  case R_LARCH_GNU_VTENTRY:
-  case R_LARCH_GNU_VTINHERIT:
-  case R_LARCH_RELAX:
-  case R_LARCH_SUB24:
-
   case R_LARCH_COPY:
   case R_LARCH_IRELATIVE:
   case R_LARCH_JUMP_SLOT:
   case R_LARCH_RELATIVE:
-
-  case R_LARCH_TLS_GD_HI20:
  */
 
   case R_LARCH_SOP_PUSH_PCREL:
