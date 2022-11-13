@@ -381,10 +381,12 @@ RelExpr LoongArch::getRelExpr(const RelType type, const Symbol &s,
 
 void LoongArch::relocate(uint8_t *loc, const Relocation &rel,
                          uint64_t val) const {
-  lld::message(
-    "XXX " + getErrorLocation(loc) + ": relocate typ=" + Twine(rel.type) +
-    " off=0x" + Twine::utohexstr(rel.offset) +
-    " val=0x" + Twine::utohexstr(val));
+  if (rel.type >= 64)
+    lld::message(
+      "XXX " + getErrorLocation(loc) + ": relocate typ=" + Twine(rel.type) +
+      " off=0x" + Twine::utohexstr(rel.offset) +
+      " val=0x" + Twine::utohexstr(val));
+
   switch (rel.type) {
   case R_LARCH_32:
     write32le(loc, val);
