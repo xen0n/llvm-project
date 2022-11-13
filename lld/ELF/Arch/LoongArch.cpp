@@ -368,13 +368,13 @@ RelExpr LoongArch::getRelExpr(const RelType type, const Symbol &s,
   case R_LARCH_SOP_POP_32_S_0_10_10_16_S2:
   case R_LARCH_SOP_POP_32_U:
     error(getErrorLocation(loc) +
-          "cannot handle stack-based LoongArch relocation (" + Twine(type) +
-          ") against symbol " + toString(s));
+          "cannot handle stack-based LoongArch relocation " + toString(type) +
+          " against symbol " + toString(s));
     return R_NONE;
 
   default:
-    error(getErrorLocation(loc) + "unknown relocation (" + Twine(type) +
-          ") against symbol " + toString(s));
+    error(getErrorLocation(loc) + "unknown relocation " + Twine(type) +
+          " against symbol " + toString(s));
     return R_NONE;
   }
 }
@@ -384,7 +384,7 @@ void LoongArch::relocate(uint8_t *loc, const Relocation &rel,
   if (rel.type >= 64)
   #define DEBUG_TYPE "LLDLoongArch"
     LLVM_DEBUG(lld::message(
-      "XXX " + getErrorLocation(loc) + ": relocate typ=" + Twine(rel.type) +
+      "XXX " + getErrorLocation(loc) + ": " + toString(rel.type) +
       " off=0x" + Twine::utohexstr(rel.offset) +
       " val=0x" + Twine::utohexstr(val)));
 
