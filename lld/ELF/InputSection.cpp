@@ -729,6 +729,8 @@ uint64_t InputSectionBase::getRelocTargetVA(const InputFile *file, RelType type,
                               *hiRel->sym, hiRel->expr);
     return 0;
   }
+  case R_LOONGARCH_PC_REGIONAL:
+    return getLoongArchPCRegionalDest(sym.getVA(a), p);
   case R_PC:
   case R_ARM_PCA: {
     uint64_t dest;
@@ -755,7 +757,7 @@ uint64_t InputSectionBase::getRelocTargetVA(const InputFile *file, RelType type,
     } else {
       dest = sym.getVA(a);
     }
-    return config->emachine == EM_LOONGARCH ? getLoongArchPCRegionalDest(dest, p): dest - p;
+    return dest - p;
   }
   case R_PLT:
     return sym.getPltVA() + a;
