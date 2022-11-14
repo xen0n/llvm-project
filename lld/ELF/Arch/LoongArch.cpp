@@ -411,12 +411,12 @@ bool LoongArch::usesOnlyLowPageBits(RelType type) const {
 
 void LoongArch::relocate(uint8_t *loc, const Relocation &rel,
                          uint64_t val) const {
-  if (rel.type >= 64)
+  if (rel.type == 95)
   #define DEBUG_TYPE "LLDLoongArch"
-    LLVM_DEBUG(lld::message(
+    lld::message(
       "XXX " + getErrorLocation(loc) + ": " + toString(rel.type) +
       " off=0x" + Twine::utohexstr(rel.offset) +
-      " val=0x" + Twine::utohexstr(val)));
+      " val=0x" + Twine::utohexstr(val));
 
   switch (rel.type) {
   case R_LARCH_32:
