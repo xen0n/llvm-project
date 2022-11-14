@@ -71,7 +71,7 @@ public:
 
 } // end anonymous namespace
 
-const uint64_t dtpOffset = 0x800;
+const uint64_t dtpOffset = 0;
 
 enum Op {
   SUB_W = 0x00110000,
