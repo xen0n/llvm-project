@@ -141,12 +141,17 @@ LoongArch::LoongArch() {
   relativeRel = R_LARCH_RELATIVE;
   iRelativeRel = R_LARCH_IRELATIVE;
 
-  // Currently LP64* ABIs only
-  assert(config->is64 && "32-bit is unimplemented");
-  symbolicRel = R_LARCH_64;
-  tlsModuleIndexRel = R_LARCH_TLS_DTPMOD64;
-  tlsOffsetRel = R_LARCH_TLS_DTPREL64;
-  tlsGotRel = R_LARCH_TLS_TPREL64;
+  if (config->is64) {
+    symbolicRel = R_LARCH_64;
+    tlsModuleIndexRel = R_LARCH_TLS_DTPMOD64;
+    tlsOffsetRel = R_LARCH_TLS_DTPREL64;
+    tlsGotRel = R_LARCH_TLS_TPREL64;
+  } else {
+    symbolicRel = R_LARCH_32;
+    tlsModuleIndexRel = R_LARCH_TLS_DTPMOD32;
+    tlsOffsetRel = R_LARCH_TLS_DTPREL32;
+    tlsGotRel = R_LARCH_TLS_TPREL32;
+  }
 
   gotRel = symbolicRel;
 
@@ -162,8 +167,9 @@ LoongArch::LoongArch() {
 }
 
 static uint32_t getEFlags(InputFile *f) {
-  assert(config->is64 && "32-bit is unimplemented");
-  return cast<ObjFile<ELF64LE>>(f)->getObj().getHeader().e_flags;
+  if (config->is64)
+    return cast<ObjFile<ELF64LE>>(f)->getObj().getHeader().e_flags;
+  return cast<ObjFile<ELF32LE>>(f)->getObj().getHeader().e_flags;
 }
 
 uint32_t LoongArch::calcEFlags() const {
