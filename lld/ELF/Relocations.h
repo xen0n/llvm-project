@@ -104,6 +104,8 @@ enum RelExpr {
   R_RISCV_PC_INDIRECT,
   R_LOONGARCH_PAGE_PC,
   R_LOONGARCH_GOT_PAGE_PC,
+  R_LOONGARCH_TLSGD_PAGE_PC,
+  R_LOONGARCH_TLSLD_PAGE_PC,
 };
 
 // Architecture-neutral representation of relocation.
