@@ -686,7 +686,9 @@ uint64_t InputSectionBase::getRelocTargetVA(const InputFile *file, RelType type,
     return sym.getGotVA() + a - getAArch64Page(in.got->getVA());
   case R_GOT_PC:
   case R_RELAX_TLS_GD_TO_IE:
-    return config->emachine == EM_LOONGARCH ? getLoongArchPage(sym.getGotVA() + a, p) : sym.getGotVA() + a - p;
+    return sym.getGotVA() + a - p;
+  case R_LOONGARCH_GOT_PAGE_PC:
+    return getLoongArchPage(sym.getGotVA() + a, p);
   case R_MIPS_GOTREL:
     return sym.getVA(a) - in.mipsGot->getGp(file);
   case R_MIPS_GOT_GP:
