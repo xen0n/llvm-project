@@ -580,7 +580,7 @@ static Relocation *getRISCVPCRelHi20(const Symbol *sym, uint64_t addend) {
   return nullptr;
 }
 
-static uint64_t getLoongArchPCRegionalDest(uint64_t dest, uint64_t p) {
+static uint64_t getLoongArchPage(uint64_t dest, uint64_t p) {
   lld::message(">>>>> PCALA dest=" + Twine::utohexstr(dest) + " P=" + Twine::utohexstr(p));
   uint64_t resultLo = dest & 0xfff;
   lld::message(">>>>>  result lo=" + Twine::utohexstr(resultLo));
@@ -686,7 +686,7 @@ uint64_t InputSectionBase::getRelocTargetVA(const InputFile *file, RelType type,
     return sym.getGotVA() + a - getAArch64Page(in.got->getVA());
   case R_GOT_PC:
   case R_RELAX_TLS_GD_TO_IE:
-    return config->emachine == EM_LOONGARCH ? getLoongArchPCRegionalDest(sym.getGotVA() + a, p) : sym.getGotVA() + a - p;
+    return config->emachine == EM_LOONGARCH ? getLoongArchPage(sym.getGotVA() + a, p) : sym.getGotVA() + a - p;
   case R_MIPS_GOTREL:
     return sym.getVA(a) - in.mipsGot->getGp(file);
   case R_MIPS_GOT_GP:
@@ -735,8 +735,8 @@ uint64_t InputSectionBase::getRelocTargetVA(const InputFile *file, RelType type,
                               *hiRel->sym, hiRel->expr);
     return 0;
   }
-  case R_LOONGARCH_PC_REGIONAL:
-    return getLoongArchPCRegionalDest(sym.getVA(a), p);
+  case R_LOONGARCH_PAGE_PC:
+    return getLoongArchPage(sym.getVA(a), p);
   case R_PC:
   case R_ARM_PCA: {
     uint64_t dest;
@@ -830,7 +830,7 @@ uint64_t InputSectionBase::getRelocTargetVA(const InputFile *file, RelType type,
     return in.got->getGlobalDynAddr(sym) + a - in.gotPlt->getVA();
   case R_TLSGD_PC: {
     uint64_t dest = in.got->getGlobalDynAddr(sym) + a;
-    return config->emachine == EM_LOONGARCH ? getLoongArchPCRegionalDest(dest, p) : dest - p;
+    return config->emachine == EM_LOONGARCH ? getLoongArchPage(dest, p) : dest - p;
   }
   case R_TLSLD_GOTPLT:
     return in.got->getVA() + in.got->getTlsIndexOff() + a - in.gotPlt->getVA();
@@ -838,7 +838,7 @@ uint64_t InputSectionBase::getRelocTargetVA(const InputFile *file, RelType type,
     return in.got->getTlsIndexOff() + a;
   case R_TLSLD_PC: {
     uint64_t dest = in.got->getTlsIndexVA() + a;
-    return config->emachine == EM_LOONGARCH ? getLoongArchPCRegionalDest(dest, p) : dest - p;
+    return config->emachine == EM_LOONGARCH ? getLoongArchPage(dest, p) : dest - p;
   }
   default:
     llvm_unreachable("invalid expression");

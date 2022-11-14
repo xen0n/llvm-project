@@ -314,7 +314,7 @@ RelExpr LoongArch::getRelExpr(const RelType type, const Symbol &s,
   case R_LARCH_PCALA64_LO20:
   case R_LARCH_PCALA_HI20:
   case R_LARCH_PCALA_LO12:
-    return R_LOONGARCH_PC_REGIONAL;
+    return R_LOONGARCH_PAGE_PC;
   case R_LARCH_GOT64_HI12:
   case R_LARCH_GOT64_LO20:
   case R_LARCH_GOT_HI20:
