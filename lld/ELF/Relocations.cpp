@@ -1261,9 +1261,6 @@ static unsigned handleTlsRelocation(RelType type, Symbol &sym,
   // unused. There only needs to be one module index entry.
   if (oneof<R_TLSLD_GOT, R_TLSLD_GOTPLT, R_TLSLD_PC, R_TLSLD_HINT,
             R_LOONGARCH_TLSLD_PAGE_PC>(expr)) {
-    message("XXX LD relocation " + toString(type) + " against " + toString(sym) +
-                  " at " + getLocation(c, sym, offset));
-
     // Local-Dynamic relocs can be relaxed to Local-Exec.
     if (toExecRelax) {
       c.relocations.push_back(
@@ -1275,7 +1272,6 @@ static unsigned handleTlsRelocation(RelType type, Symbol &sym,
       return 1;
     ctx.needsTlsLd.store(true, std::memory_order_relaxed);
     c.relocations.push_back({expr, type, offset, addend, &sym});
-    message("--- add reloc {expr=" + Twine(expr) + " type=" + toString(type) + " offset=" + Twine::utohexstr(offset) + " addend=" + Twine(addend) + " sym=" + toString(sym) + "}");
     return 1;
   }
 
@@ -1718,7 +1714,6 @@ void elf::postScanRelocations() {
   };
 
   if (ctx.needsTlsLd.load(std::memory_order_relaxed) && in.got->addTlsIndex()) {
-    message("YYYYYYYYYYYYY config->shared=" + Twine(config->shared) + " target->symbolicRel=" + toString(target->symbolicRel) + " tlsIndexOff=" + Twine(in.got->getTlsIndexOff()));
     static Undefined dummy(nullptr, "", STB_LOCAL, 0, 0);
     if (config->shared)
       mainPart->relaDyn->addReloc(
