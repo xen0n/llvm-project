@@ -643,6 +643,8 @@ uint64_t InputSectionBase::getRelocTargetVA(const InputFile *file, RelType type,
     return sym.getVA(a) - getARMStaticBase(sym);
   case R_GOT:
   case R_RELAX_TLS_GD_TO_IE_ABS:
+    if (config->emachine == EM_LOONGARCH && sym.isTls())
+      return in.got->getTlsIndexVA() + a; // XXX Why???
     return sym.getGotVA() + a;
   case R_GOTONLY_PC:
     return in.got->getVA() + a - p;
