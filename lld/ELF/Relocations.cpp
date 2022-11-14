@@ -1271,6 +1271,7 @@ static unsigned handleTlsRelocation(RelType type, Symbol &sym,
     if (expr == R_TLSLD_HINT)
       return 1;
     ctx.needsTlsLd.store(true, std::memory_order_relaxed);
+    sym.setFlags(NEEDS_TLSLD);
     c.relocations.push_back({expr, type, offset, addend, &sym});
     return 1;
   }
