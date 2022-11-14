@@ -40,6 +40,7 @@ static uint64_t getLoongArchPage(uint64_t p) {
 //     lu52i.d   T, T, %foo64_hi12(sym)
 //     ldx.d     A, A, T
 uint64_t elf::getLoongArchPageOffset(uint64_t dest, uint64_t pc) {
+  message("$$$$$$ dest=" + Twine::utohexstr(dest) + " pc=" + Twine::utohexstr(pc));
   uint64_t result = getLoongArchPage(dest) - getLoongArchPage(pc);
   if ((dest & 0xfff) > 0x7ff) {
     result += 0x1000;
@@ -410,11 +411,10 @@ bool LoongArch::usesOnlyLowPageBits(RelType type) const {
 
 void LoongArch::relocate(uint8_t *loc, const Relocation &rel,
                          uint64_t val) const {
-  if (rel.type == 95)
+  if (rel.type == 95 || rel.type == 76)
   #define DEBUG_TYPE "LLDLoongArch"
     lld::message(
-      "XXX " + getErrorLocation(loc) + ": " + toString(rel.type) +
-      " off=0x" + Twine::utohexstr(rel.offset) +
+      "XXX " + getErrorLocation(loc) + toString(rel.type) +
       " val=0x" + Twine::utohexstr(val));
 
   switch (rel.type) {
