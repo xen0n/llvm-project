@@ -42,7 +42,7 @@ public:
                          unsigned size) const override;
   RelExpr adjustGotPcExpr(RelType type, int64_t addend,
                           const uint8_t *loc) const override;
-  void relocateAlloc(InputSectionBase &sec, uint8_t *buf, bool xxxdebug = false) const override;
+  void relocateAlloc(InputSectionBase &sec, uint8_t *buf) const override;
   bool adjustPrologueForCrossSplitStack(uint8_t *loc, uint8_t *end,
                                         uint8_t stOther) const override;
   bool deleteFallThruJmpInsn(InputSection &is, InputFile *file,
@@ -985,7 +985,7 @@ bool X86_64::adjustPrologueForCrossSplitStack(uint8_t *loc, uint8_t *end,
   return false;
 }
 
-void X86_64::relocateAlloc(InputSectionBase &sec, uint8_t *buf, bool xxxdebug) const {
+void X86_64::relocateAlloc(InputSectionBase &sec, uint8_t *buf) const {
   uint64_t secAddr = sec.getOutputSection()->addr;
   if (auto *s = dyn_cast<InputSection>(&sec))
     secAddr += s->outSecOff;
@@ -996,8 +996,6 @@ void X86_64::relocateAlloc(InputSectionBase &sec, uint8_t *buf, bool xxxdebug) c
     const uint64_t val =
         sec.getRelocTargetVA(sec.file, rel.type, rel.addend,
                              secAddr + rel.offset, *rel.sym, rel.expr);
-    if (xxxdebug)
-    message("~~~~~~~~>>> GOT relocate: loc=" + getErrorLocation(loc) + " rel=" + toString(rel.type) + " val=" + Twine::utohexstr(val));
     relocate(loc, rel, val);
   }
   if (sec.jumpInstrMod) {

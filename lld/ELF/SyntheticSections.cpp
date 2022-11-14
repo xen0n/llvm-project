@@ -682,7 +682,7 @@ void GotSection::writeTo(uint8_t *buf) {
   if (size == 0)
     return;
   target->writeGotHeader(buf);
-  target->relocateAlloc(*this, buf, true);
+  target->relocateAlloc(*this, buf);
 }
 
 static uint64_t getMipsPageAddr(uint64_t addr) {

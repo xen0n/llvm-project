@@ -49,7 +49,7 @@ public:
   void relocate(uint8_t *loc, const Relocation &rel,
                 uint64_t val) const override;
   RelExpr adjustTlsExpr(RelType type, RelExpr expr) const override;
-  void relocateAlloc(InputSectionBase &sec, uint8_t *buf, bool xxxdebug = false) const override;
+  void relocateAlloc(InputSectionBase &sec, uint8_t *buf) const override;
 
 private:
   void relaxTlsGdToLe(uint8_t *loc, const Relocation &rel, uint64_t val) const;
@@ -743,7 +743,7 @@ bool AArch64Relaxer::tryRelaxAdrpLdr(const Relocation &adrpRel,
   return true;
 }
 
-void AArch64::relocateAlloc(InputSectionBase &sec, uint8_t *buf, bool xxxdebug) const {
+void AArch64::relocateAlloc(InputSectionBase &sec, uint8_t *buf) const {
   uint64_t secAddr = sec.getOutputSection()->addr;
   if (auto *s = dyn_cast<InputSection>(&sec))
     secAddr += s->outSecOff;

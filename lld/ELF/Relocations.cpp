@@ -903,11 +903,9 @@ static void addTpOffsetGotEntry(Symbol &sym) {
   in.got->addEntry(sym);
   uint64_t off = sym.getGotOffset();
   if (!sym.isPreemptible && !config->isPic) {
-    message("@@@@@@@ AAA" + toString(sym));
     in.got->relocations.push_back({R_TPREL, target->symbolicRel, off, 0, &sym});
     return;
   }
-  message("@@@@@@@ BBB" + toString(sym));
   mainPart->relaDyn->addAddendOnlyRelocIfNonPreemptible(
       target->tlsGotRel, *in.got, off, sym, target->symbolicRel);
 }
@@ -1079,7 +1077,6 @@ void RelocationScanner::processAux(RelExpr expr, RelType type, uint64_t offset,
   // handling of GOT-generating relocations.
   if (isStaticLinkTimeConstant(expr, type, sym, offset) ||
       (!config->isPic && sym.isUndefWeak())) {
-      message("############################## " + toString(sym));
       sec->relocations.push_back({expr, type, offset, addend, &sym});
       return;
   }
@@ -1247,7 +1244,6 @@ static unsigned handleTlsRelocation(RelType type, Symbol &sym,
                      config->emachine != EM_HEXAGON &&
                      config->emachine != EM_LOONGARCH &&
                      config->emachine != EM_RISCV &&
-                     config->emachine != EM_X86_64 &&
                      !c.file->ppc64DisableTLSRelax;
 
   // If we are producing an executable and the symbol is non-preemptable, it
@@ -1430,14 +1426,11 @@ template <class ELFT, class RelTy> void RelocationScanner::scanOne(RelTy *&i) {
   // Process TLS relocations, including relaxing TLS relocations. Note that
   // R_TPREL and R_TPREL_NEG relocations are resolved in processAux.
   if (sym.isTls()) {
-    message("XXX IS TLS " + toString(sym));
     if (unsigned processed =
             handleTlsRelocation(type, sym, *sec, offset, addend, expr)) {
-      message("XXX IS TLS RETURNED " + Twine(processed));
       i += processed - 1;
       return;
     }
-      message("XXX IS TLS RETURNED 0");
   }
 
   processAux(expr, type, offset, sym, addend);
@@ -1681,7 +1674,6 @@ void elf::postScanRelocations() {
     if (!sym.isTls())
       return;
     bool isLocalInExecutable = !sym.isPreemptible && !config->shared;
-    message("XXXX123123123" + toString(sym));
 
     if (flags & NEEDS_TLSDESC) {
       in.got->addTlsDescEntry(sym);
@@ -1690,7 +1682,6 @@ void elf::postScanRelocations() {
           target->tlsDescRel);
     }
     if (flags & NEEDS_TLSGD) {
-      message("AAAAAAAAAA");
       in.got->addDynTlsEntry(sym);
       uint64_t off = in.got->getGlobalDynOffset(sym);
       if (isLocalInExecutable)
@@ -1712,36 +1703,29 @@ void elf::postScanRelocations() {
             {R_ABS, target->tlsOffsetRel, offsetOff, 0, &sym});
     }
     if (flags & NEEDS_TLSGD_TO_IE) {
-      message("BBBBBBBBBBBBB");
       in.got->addEntry(sym);
       mainPart->relaDyn->addSymbolReloc(target->tlsGotRel, *in.got,
                                         sym.getGotOffset(), sym);
     }
     if (flags & NEEDS_GOT_DTPREL) {
-      message("CCCCCCCCCCCCC");
       in.got->addEntry(sym);
       in.got->relocations.push_back(
           {R_ABS, target->tlsOffsetRel, sym.getGotOffset(), 0, &sym});
     }
 
-    if ((flags & NEEDS_TLSIE) && !(flags & NEEDS_TLSGD_TO_IE)) {
-      message("DDDDDDDDDDDD");
+    if ((flags & NEEDS_TLSIE) && !(flags & NEEDS_TLSGD_TO_IE))
       addTpOffsetGotEntry(sym);
-    }
   };
 
   if (ctx.needsTlsLd.load(std::memory_order_relaxed) && in.got->addTlsIndex()) {
     message("YYYYYYYYYYYYY config->shared=" + Twine(config->shared) + " target->symbolicRel=" + toString(target->symbolicRel) + " tlsIndexOff=" + Twine(in.got->getTlsIndexOff()));
     static Undefined dummy(nullptr, "", STB_LOCAL, 0, 0);
-    if (config->shared) {
-      message("YYYYYY1");
+    if (config->shared)
       mainPart->relaDyn->addReloc(
           {target->tlsModuleIndexRel, in.got.get(), in.got->getTlsIndexOff()});
-    } else {
-      message("YYYYYY2");
+    else
       in.got->relocations.push_back(
           {R_ADDEND, target->symbolicRel, in.got->getTlsIndexOff(), 1, &dummy});
-    }
   }
 
   assert(symAux.size() == 1);
