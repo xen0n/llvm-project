@@ -309,7 +309,7 @@ RelExpr LoongArch::getRelExpr(const RelType type, const Symbol &s,
   case R_LARCH_TLS_IE64_PC_LO20:
   case R_LARCH_TLS_IE64_PC_HI12:
     config->hasTlsIe = true;
-    return R_GOT_PC;
+    return R_LOONGARCH_GOT_PAGE_PC;
   case R_LARCH_PCALA64_HI12:
   case R_LARCH_PCALA64_LO20:
   case R_LARCH_PCALA_HI20:
