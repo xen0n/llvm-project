@@ -38,7 +38,7 @@ public:
                 uint64_t val) const override;
 
   RelExpr adjustTlsExpr(RelType type, RelExpr expr) const override;
-  void relocateAlloc(InputSectionBase &sec, uint8_t *buf) const override;
+  void relocateAlloc(InputSectionBase &sec, uint8_t *buf, bool xxxdebug = false) const override;
 };
 } // namespace
 
@@ -468,7 +468,7 @@ static void relaxTlsLdToLe(uint8_t *loc, const Relocation &rel, uint64_t val) {
   memcpy(loc - 2, inst, sizeof(inst));
 }
 
-void X86::relocateAlloc(InputSectionBase &sec, uint8_t *buf) const {
+void X86::relocateAlloc(InputSectionBase &sec, uint8_t *buf, bool xxxdebug) const {
   uint64_t secAddr = sec.getOutputSection()->addr;
   if (auto *s = dyn_cast<InputSection>(&sec))
     secAddr += s->outSecOff;

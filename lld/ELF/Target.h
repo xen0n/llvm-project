@@ -89,7 +89,7 @@ public:
   void relocateNoSym(uint8_t *loc, RelType type, uint64_t val) const {
     relocate(loc, Relocation{R_NONE, type, 0, 0, nullptr}, val);
   }
-  virtual void relocateAlloc(InputSectionBase &sec, uint8_t *buf) const;
+  virtual void relocateAlloc(InputSectionBase &sec, uint8_t *buf, bool xxxdebug = false) const;
 
   // Do a linker relaxation pass and return true if we changed something.
   virtual bool relaxOnce(int pass) const { return false; }

@@ -154,7 +154,7 @@ RelExpr TargetInfo::adjustGotPcExpr(RelType type, int64_t addend,
   return R_GOT_PC;
 }
 
-void TargetInfo::relocateAlloc(InputSectionBase &sec, uint8_t *buf) const {
+void TargetInfo::relocateAlloc(InputSectionBase &sec, uint8_t *buf, bool xxxdebug) const {
   const unsigned bits = config->is64 ? 64 : 32;
   uint64_t secAddr = sec.getOutputSection()->addr;
   if (auto *s = dyn_cast<InputSection>(&sec))
@@ -165,8 +165,11 @@ void TargetInfo::relocateAlloc(InputSectionBase &sec, uint8_t *buf) const {
         sec.getRelocTargetVA(sec.file, rel.type, rel.addend,
                              secAddr + rel.offset, *rel.sym, rel.expr),
         bits);
-    if (rel.expr != R_RELAX_HINT)
+    if (rel.expr != R_RELAX_HINT) {
+      if (xxxdebug)
+        message("~~~~~~~~>>> GOT relocate: loc=" + getErrorLocation(loc) + " rel=" + toString(rel.type) + " val=" + Twine::utohexstr(val));
       relocate(loc, rel, val);
+    }
   }
 }
 

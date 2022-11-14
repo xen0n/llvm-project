@@ -326,7 +326,6 @@ RelExpr LoongArch::getRelExpr(const RelType type, const Symbol &s,
   case R_LARCH_B21:
   case R_LARCH_B26:
     return R_PLT_PC;
-
   case R_LARCH_GOT_PC_HI20:
   case R_LARCH_GOT64_PC_LO20:
   case R_LARCH_GOT64_PC_HI12:

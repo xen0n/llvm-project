@@ -51,7 +51,7 @@ public:
                 uint64_t val) const override;
   RelExpr adjustTlsExpr(RelType type, RelExpr expr) const override;
   int getTlsGdRelaxSkip(RelType type) const override;
-  void relocateAlloc(InputSectionBase &sec, uint8_t *buf) const override;
+  void relocateAlloc(InputSectionBase &sec, uint8_t *buf, bool xxxdebug = false) const override;
 
 private:
   void relaxTlsGdToIe(uint8_t *loc, const Relocation &rel, uint64_t val) const;
@@ -482,7 +482,7 @@ void PPC::relaxTlsIeToLe(uint8_t *loc, const Relocation &rel,
   }
 }
 
-void PPC::relocateAlloc(InputSectionBase &sec, uint8_t *buf) const {
+void PPC::relocateAlloc(InputSectionBase &sec, uint8_t *buf, bool xxxdebug) const {
   uint64_t secAddr = sec.getOutputSection()->addr;
   if (auto *s = dyn_cast<InputSection>(&sec))
     secAddr += s->outSecOff;
