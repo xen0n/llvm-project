@@ -21,6 +21,7 @@
 #include "llvm/Support/Endian.h"
 #include "llvm/Support/xxhash.h"
 #include <algorithm>
+#include <atomic>
 #include <mutex>
 #include <vector>
 
@@ -645,10 +646,11 @@ uint64_t InputSectionBase::getRelocTargetVA(const InputFile *file, RelType type,
   case R_RELAX_TLS_GD_TO_IE_ABS:
     // XXX Why???
     if (config->emachine == EM_LOONGARCH && sym.isTls()) {
-      if (sym.hasFlag(NEEDS_TLSLD))
-        return in.got->getTlsIndexVA() + a;
       if (sym.hasFlag(NEEDS_TLSGD))
         return in.got->getGlobalDynAddr(sym) + a;
+      if (ctx.needsTlsLd.load(std::memory_order_relaxed))
+        return in.got->getTlsIndexVA() + a;
+      message("XXXXXX tls branch fallthrough: " + toString(sym));
     }
     return sym.getGotVA() + a;
   case R_GOTONLY_PC:

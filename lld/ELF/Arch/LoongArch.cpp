@@ -346,7 +346,6 @@ RelExpr LoongArch::getRelExpr(const RelType type, const Symbol &s,
   case R_LARCH_TLS_IE_PC_HI20:
   case R_LARCH_TLS_IE64_PC_LO20:
   case R_LARCH_TLS_IE64_PC_HI12:
-    config->hasTlsIe = true;
     return R_LOONGARCH_GOT_PAGE_PC;
   case R_LARCH_PCALA64_HI12:
   case R_LARCH_PCALA64_LO20:
@@ -456,11 +455,7 @@ void LoongArch::relocate(uint8_t *loc, const Relocation &rel,
   }
 
   // Relocs writing val[11:0] to instruction slot Sk12.
-  case R_LARCH_ABS_LO12: {
-    // TODO: checkInt(loc, SignExtend64(hi, bits) >> 12, 20, rel);
-    write32le(loc, setK12(read32le(loc), extractBits(val, 11, 0)));
-    return;
-  }
+  case R_LARCH_ABS_LO12:
   case R_LARCH_PCALA_LO12:
   case R_LARCH_GOT_PC_LO12:
   case R_LARCH_GOT_LO12:
