@@ -650,7 +650,7 @@ uint64_t InputSectionBase::getRelocTargetVA(const InputFile *file, RelType type,
         return in.got->getGlobalDynAddr(sym) + a;
       if (ctx.needsTlsLd.load(std::memory_order_relaxed))
         return in.got->getTlsIndexVA() + a;
-      message("XXXXXX tls branch fallthrough: " + toString(sym));
+      // message("XXXXXX tls branch fallthrough: " + toString(sym));
     }
     return sym.getGotVA() + a;
   case R_GOTONLY_PC:
@@ -830,8 +830,6 @@ uint64_t InputSectionBase::getRelocTargetVA(const InputFile *file, RelType type,
     return in.got->getTlsIndexOff() + a;
   case R_TLSLD_PC:
     return in.got->getTlsIndexVA() + a - p;
-  case R_LOONGARCH_TLSLD_PAGE_PC:
-    return getLoongArchPageOffset(in.got->getTlsIndexVA() + a, p);
   default:
     llvm_unreachable("invalid expression");
   }
