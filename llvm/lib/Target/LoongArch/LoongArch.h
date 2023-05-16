@@ -39,6 +39,15 @@ FunctionPass *createLoongArchPreRAExpandPseudoPass();
 void initializeLoongArchDAGToDAGISelPass(PassRegistry &);
 void initializeLoongArchExpandAtomicPseudoPass(PassRegistry &);
 void initializeLoongArchPreRAExpandPseudoPass(PassRegistry &);
+
+namespace LoongArchAS {
+enum : unsigned {
+  ForceSmallCM = 1024,
+  ForceMediumCM = 1025,
+  ForceLargeCM = 1026
+};
+} // end namespace LoongArchAS
+
 } // end namespace llvm
 
 #endif // LLVM_LIB_TARGET_LOONGARCH_LOONGARCH_H

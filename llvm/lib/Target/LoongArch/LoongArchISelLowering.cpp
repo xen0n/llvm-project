@@ -443,24 +443,40 @@ SDValue LoongArchTargetLowering::lowerFP_TO_SINT(SDValue Op,
 }
 
 static SDValue getTargetNode(GlobalAddressSDNode *N, SDLoc DL, EVT Ty,
-                             SelectionDAG &DAG, unsigned Flags) {
+                             SelectionDAG &DAG, CodeModel::Model &OverrideCM,
+                             unsigned Flags) {
+  switch (N->getAddressSpace()) {
+  case LoongArchAS::ForceSmallCM:
+    OverrideCM = CodeModel::Small;
+    break;
+  case LoongArchAS::ForceMediumCM:
+    OverrideCM = CodeModel::Medium;
+    break;
+  case LoongArchAS::ForceLargeCM:
+    OverrideCM = CodeModel::Large;
+    break;
+  }
+
   return DAG.getTargetGlobalAddress(N->getGlobal(), DL, Ty, 0, Flags);
 }
 
 static SDValue getTargetNode(BlockAddressSDNode *N, SDLoc DL, EVT Ty,
-                             SelectionDAG &DAG, unsigned Flags) {
+                             SelectionDAG &DAG, CodeModel::Model &OverrideCM,
+                             unsigned Flags) {
   return DAG.getTargetBlockAddress(N->getBlockAddress(), Ty, N->getOffset(),
                                    Flags);
 }
 
 static SDValue getTargetNode(ConstantPoolSDNode *N, SDLoc DL, EVT Ty,
-                             SelectionDAG &DAG, unsigned Flags) {
+                             SelectionDAG &DAG, CodeModel::Model &OverrideCM,
+                             unsigned Flags) {
   return DAG.getTargetConstantPool(N->getConstVal(), Ty, N->getAlign(),
                                    N->getOffset(), Flags);
 }
 
 static SDValue getTargetNode(JumpTableSDNode *N, SDLoc DL, EVT Ty,
-                             SelectionDAG &DAG, unsigned Flags) {
+                             SelectionDAG &DAG, CodeModel::Model &OverrideCM,
+                             unsigned Flags) {
   return DAG.getTargetJumpTable(N->getIndex(), Ty, Flags);
 }
 
@@ -469,9 +485,10 @@ SDValue LoongArchTargetLowering::getAddr(NodeTy *N, SelectionDAG &DAG,
                                          bool IsLocal) const {
   SDLoc DL(N);
   EVT Ty = getPointerTy(DAG.getDataLayout());
-  SDValue Addr = getTargetNode(N, DL, Ty, DAG, 0);
+  CodeModel::Model CM = DAG.getTarget().getCodeModel();
+  SDValue Addr = getTargetNode(N, DL, Ty, DAG, CM, 0);
 
-  switch (DAG.getTarget().getCodeModel()) {
+  switch (CM) {
   default:
     report_fatal_error("Unsupported code model");
 
