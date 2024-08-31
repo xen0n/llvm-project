@@ -43,6 +43,8 @@ uint16_t utils::elf::getTargetMachine() {
   return EM_S390;
 #elif defined(__aarch64__)
   return EM_AARCH64;
+#elif defined(__loongarch_lp64)
+  return EM_LOONGARCH;
 #elif defined(__powerpc64__)
   return EM_PPC64;
 #else

@@ -45,6 +45,16 @@ typedef enum ffi_abi {
   FFI_DEFAULT_ABI = 2, // FFI_UNIX64.
 #elif defined(__aarch64__) || defined(__arm64__) || defined(_M_ARM64)
   FFI_DEFAULT_ABI = 1, // FFI_SYSV.
+#elif defined(__loongarch_lp64)
+#  if defined(__loongarch_soft_float)
+  FFI_DEFAULT_ABI = 1, // FFI_LP64S.
+#  elif defined(__loongarch_single_float)
+  FFI_DEFAULT_ABI = 2, // FFI_LP64F.
+#  elif defined(__loongarch_double_float)
+  FFI_DEFAULT_ABI = 3, // FFI_LP64D.
+#  else
+#  error "Unknown LoongArch floating-point ABI"
+#  endif
 #elif defined(__powerpc64__)
   FFI_DEFAULT_ABI = 8, // FFI_LINUX.
 #elif defined(__s390x__)

@@ -4199,8 +4199,8 @@ bool CompilerInvocation::ParseLangArgs(LangOptions &Opts, ArgList &Args,
       llvm::Triple TT(A->getValue(i));
 
       if (TT.getArch() == llvm::Triple::UnknownArch ||
-          !(TT.getArch() == llvm::Triple::aarch64 || TT.isPPC() ||
-            TT.getArch() == llvm::Triple::systemz ||
+          !(TT.getArch() == llvm::Triple::aarch64 || TT.isLoongArch() ||
+            TT.isPPC() || TT.getArch() == llvm::Triple::systemz ||
             TT.getArch() == llvm::Triple::nvptx ||
             TT.getArch() == llvm::Triple::nvptx64 ||
             TT.getArch() == llvm::Triple::amdgcn ||

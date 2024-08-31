@@ -1,4 +1,4 @@
-set(supported_targets x86_64 aarch64 ppc64 ppc64le s390x)
+set(supported_targets x86_64 aarch64 loongarch64 ppc64 ppc64le s390x)
 if(NOT ${CMAKE_SYSTEM_PROCESSOR} IN_LIST supported_targets)
   message(STATUS "Not building ${machine} NextGen offloading plugin")
   return()
@@ -54,6 +54,10 @@ elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64$")
 elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64$")
   list(APPEND LIBOMPTARGET_SYSTEM_TARGETS
        "aarch64-unknown-linux-gnu" "aarch64-unknown-linux-gnu-LTO")
+  set(LIBOMPTARGET_SYSTEM_TARGETS "${LIBOMPTARGET_SYSTEM_TARGETS}" PARENT_SCOPE)
+elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "loongarch64$")
+  list(APPEND LIBOMPTARGET_SYSTEM_TARGETS
+       "loongarch64-unknown-linux-gnu" "loongarch64-unknown-linux-gnu-LTO")
   set(LIBOMPTARGET_SYSTEM_TARGETS "${LIBOMPTARGET_SYSTEM_TARGETS}" PARENT_SCOPE)
 elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "s390x$")
   list(APPEND LIBOMPTARGET_SYSTEM_TARGETS

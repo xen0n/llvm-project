@@ -30,6 +30,7 @@
 #include "llvm/Frontend/OpenMP/OMPDeviceConstants.h"
 #include "llvm/Frontend/OpenMP/OMPGridValues.h"
 #include "llvm/Support/DynamicLibrary.h"
+#include "llvm/TargetParser/Triple.h"
 
 #if !defined(__BYTE_ORDER__) || !defined(__ORDER_LITTLE_ENDIAN__) ||           \
     !defined(__ORDER_BIG_ENDIAN__)
@@ -434,6 +435,8 @@ struct GenELF64PluginTy final : public GenericPluginTy {
 #else
     return llvm::Triple::aarch64_be;
 #endif
+#elif defined(__loongarch_lp64)
+    return llvm::Triple::loongarch64;
 #elif defined(__powerpc64__)
 #ifdef LITTLEENDIAN_CPU
     return llvm::Triple::ppc64le;
